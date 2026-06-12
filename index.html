@@ -24,7 +24,12 @@ height:100vh;
 background-size:cover;
 background-position:center;
 position:relative;
-transition:all 1s ease;
+animation:zoom 12s linear infinite;
+}
+
+@keyframes zoom{
+0%{transform:scale(1);}
+100%{transform:scale(1.08);}
 }
 
 .overlay{
@@ -32,17 +37,9 @@ position:absolute;
 inset:0;
 background:linear-gradient(
 to top,
-rgba(0,0,0,.9),
+rgba(0,0,0,.95),
 rgba(0,0,0,.2)
 );
-}
-
-.info{
-position:absolute;
-bottom:60px;
-left:60px;
-max-width:700px;
-color:white;
 }
 
 .logo{
@@ -50,6 +47,16 @@ position:absolute;
 top:20px;
 right:20px;
 width:180px;
+z-index:10;
+}
+
+.info{
+position:absolute;
+left:50px;
+bottom:60px;
+max-width:700px;
+color:white;
+z-index:10;
 }
 
 h1{
@@ -61,50 +68,103 @@ p{
 font-size:22px;
 line-height:1.4;
 }
-</style>
 
+.slogan{
+position:absolute;
+top:30px;
+left:30px;
+color:#fff;
+font-size:20px;
+font-weight:bold;
+z-index:10;
+}
+
+.loading{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+color:white;
+font-size:24px;
+}
+</style>
 </head>
+
 <body>
 
 <div id="banner">
+
 <div class="overlay"></div>
+
+<div class="slogan">
+BrunoTV • Uma tela, infinitas possibilidades
+</div>
 
 <img class="logo" src="logo.png">
 
 <div class="info">
-<h1 id="titulo"></h1>
+<h1 id="titulo">Carregando...</h1>
 <p id="descricao"></p>
 </div>
+
+<div class="loading" id="loading">
+Carregando banners...
+</div>
+
 </div>
 
 <script>
 
-const API_KEY = "SUA_API_KEY_TMDB";
+const API_KEY = "1af5ece4d388d1960c27b72e6a9d917f";
 
 let banners = [];
 let atual = 0;
 
-async function carregar(){
+async function carregar() {
 
-const filmes = await fetch(
+try {
+
+const resposta = await fetch(
 `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&language=pt-BR`
 );
 
-const dados = await filmes.json();
+const dados = await resposta.json();
 
-banners = dados.results.filter(
-item => item.backdrop_path
-);
+banners = dados.results.filter(item => item.backdrop_path);
+
+if(!banners.length){
+document.getElementById("titulo").innerText =
+"Nenhum banner encontrado";
+return;
+}
+
+document.getElementById("loading").style.display = "none";
 
 mostrar();
 
-setInterval(()=>{
+setInterval(() => {
+
 atual++;
+
 if(atual >= banners.length){
 atual = 0;
 }
+
 mostrar();
-},10000);
+
+}, 10000);
+
+} catch (erro){
+
+document.getElementById("titulo").innerText =
+"Erro ao carregar banners";
+
+document.getElementById("descricao").innerText =
+"Verifique a conexão ou a chave da API.";
+
+console.log(erro);
+
+}
 
 }
 
@@ -116,7 +176,7 @@ document.getElementById("banner").style.backgroundImage =
 `url(https://image.tmdb.org/t/p/original${item.backdrop_path})`;
 
 document.getElementById("titulo").innerText =
-item.title || item.name;
+item.title || item.name || "Sem título";
 
 document.getElementById("descricao").innerText =
 item.overview || "";
