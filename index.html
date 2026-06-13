@@ -82,25 +82,29 @@ opacity:.8;
 
 .info{
 position:absolute;
-left:50px;
+right:50px;   /* 👈 empurra para a direita */
+left:auto;    /* 👈 remove o left */
 bottom:80px;
-max-width:850px;
+max-width:600px;
+text-align:right; /* 👈 alinha o texto para direita */
+}
 color:white;
 z-index:10;
 }
 
 .badges{
 display:flex;
-flex-wrap:wrap;
-gap:10px;
+flex-direction:column; /* 👈 joga um embaixo do outro */
+align-items:flex-end;   /* 👈 alinha à direita (combina com sua info) */
+gap:6px;
 margin-bottom:15px;
 }
 
 .badge{
 background:#d60000;
-padding:8px 16px;
+padding:5px 10px;
 border-radius:20px;
-font-size:14px;
+font-size:8px;
 font-weight:bold;
 }
 
@@ -109,13 +113,13 @@ background:#ff7a00;
 }
 
 h1{
-font-size:58px;
+font-size:40px;
 margin-bottom:15px;
 text-shadow:0 2px 12px rgba(0,0,0,.9);
 }
 
 #descricao{
-font-size:18px;
+font-size:14px;
 line-height:1.5;
 max-width:700px;
 text-shadow:0 2px 12px rgba(0,0,0,.9);
