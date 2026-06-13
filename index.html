@@ -1,9 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrunoTV Premium</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#000;
+overflow:hidden;
+font-family:Arial,sans-serif;
+}
+
+#banner{
+position:fixed;
+inset:0;
+background-size:cover;
+background-position:center;
+transition:all 1.5s ease;
+animation:zoom 15s linear infinite alternate;
+}
+
+@keyframes zoom{
+from{transform:scale(1);}
+to{transform:scale(1.08);}
+}
+
+.overlay{
+position:absolute;
+inset:0;
+background:linear-gradient(
+to top,
+rgba(0,0,0,.95),
+rgba(0,0,0,.15)
+);
+}
+
+.logo{
+position:absolute;
+top:20px;
+right:20px;
+width:180px;
+z-index:10;
+filter:drop-shadow(0 0 10px rgba(0,0,0,.8));
+}
+
+.topbar{
+position:absolute;
+top:20px;
+left:20px;
+color:#fff;
+z-index:10;
+}
+
+#relogio{
+font-size:42px;
+font-weight:bold;
+}
+
+#data{
+font-size:18px;
+text-transform:capitalize;
+opacity:.9;
+}
+
+.info{
+position:absolute;
+left:50px;
+bottom:80px;
+max-width:850px;
+color:white;
+z-index:10;
+}
+
+.badges{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:15px;
+}
+
+.badge{
+background:#d60000;
+padding:8px 16px;
+border-radius:20px;
+font-size:14px;
+font-weight:bold;
+}
+
+.badge.hot{
+background:#ff7a00;
+}
+
+h1{
+font-size:58px;
+margin-bottom:15px;
+text-shadow:0 2px 12px rgba(0,0,0,.9);
+}
+
+#descricao{
+font-size:18px;
+line-height:1.5;
+max-width:700px;
+text-shadow:0 2px 12px rgba(0,0,0,.9);
+}
+
+.progress{
+position:absolute;
+left:0;
+bottom:0;
+height:6px;
+width:100%;
+background:rgba(255,255,255,.15);
+z-index:20;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#d60000;
+animation:progress 8s linear infinite;
+}
+
+@keyframes progress{
+from{width:0%;}
+to{width:100%;}
+}
+
+.loading{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+color:white;
+font-size:28px;
+z-index:20;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="banner">
+
+<div class="overlay"></div>
+
+<img src="logo.png" class="logo">
+
+<div class="topbar">
+<div id="relogio"></div>
+<div id="data"></div>
+</div>
+
+<div class="info">
+
+<div class="badges">
+
+<div class="badge" id="tipo">
+FILME
+</div>
+
+<div class="badge" id="ano">
+2025
+</div>
+
+<div class="badge" id="nota">
+⭐ 8.5
+</div>
+
+<div class="badge" id="genero">
+AÇÃO
+</div>
+
+<div class="badge hot" id="emalta" style="display:none">
+🔥 EM ALTA
+</div>
+
+</div>
+
+<h1 id="titulo">
+Carregando...
+</h1>
+
+<div id="descricao"></div>
+
+</div>
+
+<div class="loading" id="loading">
+Carregando banners...
+</div>
+
+<div class="progress">
+<div class="progress-bar" id="barra"></div>
+</div>
+
+</div>
+
 <script>
 
-const API_KEY = "1af5ece4d388d1960c27b72e6a9d917f";
+const API_KEY =
+"1af5ece4d388d1960c27b72e6a9d917f";
 
 let banners = [];
 let atual = 0;
+
+const generos = {
+
+28:"Ação",
+12:"Aventura",
+16:"Animação",
+35:"Comédia",
+80:"Crime",
+99:"Documentário",
+18:"Drama",
+10751:"Família",
+14:"Fantasia",
+36:"História",
+27:"Terror",
+10402:"Música",
+9648:"Mistério",
+10749:"Romance",
+878:"Ficção",
+10770:"TV",
+53:"Suspense",
+10752:"Guerra",
+37:"Faroeste"
+
+};
+
+function atualizarRelogio(){
+
+const agora = new Date();
+
+document.getElementById("relogio").innerText =
+agora.toLocaleTimeString("pt-BR",{
+timeZone:"America/Sao_Paulo",
+hour:"2-digit",
+minute:"2-digit",
+hour12:false
+});
+
+document.getElementById("data").innerText =
+agora.toLocaleDateString("pt-BR",{
+timeZone:"America/Sao_Paulo",
+weekday:"long",
+day:"2-digit",
+month:"long",
+year:"numeric"
+});
+
+}
+
+setInterval(atualizarRelogio,1000);
+atualizarRelogio();
 
 async function carregar(){
 
@@ -20,19 +277,29 @@ const seriesReq = await fetch(
 const filmes = await filmesReq.json();
 const series = await seriesReq.json();
 
-banners = [
-
-...(filmes.results || []).map(item => ({
+const listaFilmes =
+(filmes.results || []).map(item => ({
 ...item,
 tipo:"FILME"
-})),
+}));
 
-...(series.results || []).map(item => ({
+const listaSeries =
+(series.results || []).map(item => ({
 ...item,
 tipo:"SÉRIE"
-}))
+}));
 
+banners = [
+...listaFilmes,
+...listaSeries
 ].filter(item => item.backdrop_path);
+
+banners.sort(() =>
+Math.random() - 0.5
+);
+
+document.getElementById("loading").style.display =
+"none";
 
 mostrar();
 
@@ -51,15 +318,16 @@ mostrar();
 
 }catch(e){
 
+document.getElementById("titulo").innerText =
+"Erro ao carregar banners";
+
 console.log(e);
 
-document.getElementById("titulo").innerText =
-"Erro ao carregar conteúdos";
-
 }
 
 }
-  function reiniciarBarra(){
+
+function reiniciarBarra(){
 
 const barra =
 document.getElementById("barra");
@@ -73,64 +341,31 @@ barra.style.animation =
 
 }
 
-function atualizarMiniaturas(){
-
-const container =
-document.getElementById("miniaturas");
-
-container.innerHTML = "";
-
-for(let i=0;i<6;i++){
-
-const index =
-(atual + i) % banners.length;
-
-const item =
-banners[index];
-
-const div =
-document.createElement("div");
-
-div.className =
-i === 0
-? "thumb ativa"
-: "thumb";
-
-if(item.poster_path){
-
-div.style.backgroundImage =
-`url(https://image.tmdb.org/t/p/w500${item.poster_path})`;
-
-}
-
-container.appendChild(div);
-
-}
-
-}
-
 function mostrar(){
-
-if(!banners.length) return;
 
 const item =
 banners[atual];
 
-document.getElementById("banner").style.backgroundImage =
+document.getElementById("banner")
+.style.backgroundImage =
 `url(https://image.tmdb.org/t/p/original${item.backdrop_path})`;
 
 document.getElementById("titulo").innerText =
-item.title || item.name;
+item.title ||
+item.name ||
+"Sem título";
 
 const sinopse =
 item.overview || "";
 
-document.getElementById("descricao").innerText =
+document.getElementById("descricao")
+.innerText =
 sinopse.length > 180
-? sinopse.substring(0,180) + "..."
+? sinopse.substring(0,180)+"..."
 : sinopse;
 
-document.getElementById("tipo").innerText =
+document.getElementById("tipo")
+.innerText =
 item.tipo;
 
 const data =
@@ -138,18 +373,44 @@ item.release_date ||
 item.first_air_date ||
 "";
 
-document.getElementById("ano").innerText =
+document.getElementById("ano")
+.innerText =
 data
 ? data.substring(0,4)
 : "N/A";
-  document.getElementById("nota").innerText =
-"⭐ " +
-(item.vote_average || 0).toFixed(1);
 
-atualizarMiniaturas();
+document.getElementById("nota")
+.innerText =
+"⭐ " +
+(item.vote_average || 0)
+.toFixed(1);
+
+const lista =
+item.genre_ids || [];
+
+document.getElementById("genero")
+.innerText =
+lista.length
+? generos[lista[0]] || "Entretenimento"
+: "Entretenimento";
+
+if((item.vote_average || 0) >= 8){
+
+document.getElementById("emalta")
+.style.display = "inline-block";
+
+}else{
+
+document.getElementById("emalta")
+.style.display = "none";
+
+}
 
 }
 
 carregar();
 
 </script>
+
+</body>
+</html>
